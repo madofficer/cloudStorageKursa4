@@ -1,0 +1,6 @@
+fastapi[standard]~=0.129.0
+uvicorn
+pydantic~=2.12.5
+tortoise-orm
+aiosqlite
+pwdlib[argon2]~=0.3.0
