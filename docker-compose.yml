@@ -1,5 +1,9 @@
 version: '3.5'
 services:
+  filestorage:
+    build: ./filestorage
+    ports:
+      - 8000:8000
   backend_auth:
     build: .
     ports:

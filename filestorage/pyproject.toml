@@ -1,0 +1,20 @@
+[project]
+name = "filestorage"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "fastapi>=0.129.0",
+    "pydantic>=2.12.5",
+    "tortoise-orm>=1.1.4",
+    "uvicorn>=0.41.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "ruff>=0.15.1",
+    "ty>=0.0.17",
+]
