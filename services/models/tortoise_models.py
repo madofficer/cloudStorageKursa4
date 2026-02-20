@@ -1,10 +1,10 @@
 from tortoise.models import Model
-from tortoise.fields import TextField, IntField, CharField
+from tortoise.fields import TextField, UUIDField, CharField
 from pwdlib import PasswordHash
 
 
 class User(Model):
-    user_id = IntField(primary_key=True, index=True)
+    user_id = UUIDField(primary_key=True, index=True)
     username = CharField(index=True, unique=True, max_length=128)
     hashed_password = TextField()
 

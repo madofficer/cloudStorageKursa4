@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Annotated
+from uuid import UUID
+
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pwdlib import PasswordHash
@@ -30,6 +32,13 @@ async def create_user(user: UserRequest):
 
     await user_obj.save()
     return {"user_id": user_obj.user_id, "username": user_obj.username}
+
+
+@app.delete("/user/{user_id}", response_model=UserResponse)
+async def delete_user(user_id: UUID):
+    user_to_del = await User.get(user_id=user_id)
+    await user_to_del.delete()
+    return {"user_id": user_to_del.user_id, "username": user_to_del.username}
 
 
 @app.post("token/")
