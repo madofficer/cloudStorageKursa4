@@ -1,9 +1,8 @@
 from uuid import UUID
 
-import pydantic
 from pydantic import BaseModel
 
-class UserPydantic(BaseModel):
+class UserPydantic(BaseModel): # TODO rename DTO
     user_id: UUID
     username: str
     hashed_password: str

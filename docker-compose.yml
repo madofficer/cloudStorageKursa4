@@ -4,6 +4,17 @@ services:
     build: ./filestorage
     ports:
       - 8000:8000
+
+  db:
+    image: postgres:17-alpine
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: afonya
+      POSTGRES_DB: user_db
+
   backend_auth:
     build: .
     ports:

@@ -1,22 +1,21 @@
-from contextlib import asynccontextmanager
-from typing import Annotated
+import logging
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pwdlib import PasswordHash
-from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 from pwdlib import PasswordHash
 
 from services.models.tortoise_models import User
 from services.models.pydantic_models import UserResponse, UserRequest
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 app = FastAPI()
 
 register_tortoise(
     app,
-    db_url='sqlite:///app/storage/db.sqlite3',
+    db_url="postgres://postgres:afonya@db:5432/user_db",
     modules={'models': ['services.models.tortoise_models']},
     generate_schemas=True,
     add_exception_handlers=True,
@@ -36,9 +35,9 @@ async def create_user(user: UserRequest):
 
 @app.delete("/user/{user_id}", response_model=UserResponse)
 async def delete_user(user_id: UUID):
-    user_to_del = await User.get(user_id=user_id)
-    await user_to_del.delete()
-    return {"user_id": user_to_del.user_id, "username": user_to_del.username}
+    logger.debug("%s", await User.get(user_id=user_id))
+    await User.get(user_id=user_id).delete()
+    return {"user_id": user_id, "username": "username"}
 
 
 @app.post("token/")
@@ -48,7 +47,5 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.get("/")
 async def get_root() -> dict:
-    with open('/app/storage/privet.txt', 'w') as fp:
-        fp.write("Boris")
-        print('mozgi ne yebite')
+    print('mozgi ne yebite')
     return {"Hellow": "World"}
