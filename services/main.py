@@ -47,14 +47,20 @@ async def authenticate_user(username, password) -> User:
     return user_obj
 
 
+async def generate_token(sub: str, exp: timedelta, typ: str, jwt_secret: str = JWT_SECRET, algorithm: str = "HS256") -> str:
+    token = jwt.encode({"sub": sub, "exp": datetime.now(timezone.utc) + exp},
+                       jwt_secret, algorithm, headers={"typ" : typ})
+    return token
+
+
 @app.post("/user/login")
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     user_obj = await authenticate_user(form_data.username, form_data.password)
 
-    token = jwt.encode({"sub": str(user_obj.user_id), "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
-                       JWT_SECRET, "HS256")
+    token = await generate_token(str(user_obj.user_id),  timedelta(minutes=15), typ="access_token")
+    refresh_token = await generate_token(str(user_obj.user_id),  timedelta(days=14), typ="refresh_token")
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -82,11 +88,16 @@ async def validate_token(user: User = Depends(get_current_user)):
     return Response(status_code=status.HTTP_200_OK)
 
 
+# @app.get("/token/refresh")
+# async def create_refresh_token(user: User = Depends(get_current_user)):
+#
+
+
 @app.delete("/user/", response_model=UserResponse)
 async def delete_user(user: User = Depends(get_current_user)):
     user_id = user.user_id
-    await User.get(user_id=user_id).delete()
-    return {"user_id": user_id, "username": "username"}
+    await user.delete()
+    return {"user_id": user_id}
 
 
 @app.get("/")
