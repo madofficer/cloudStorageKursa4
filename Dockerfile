@@ -6,6 +6,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY services/ ./services
+COPY core/ ./core
 
-ENTRYPOINT ["fastapi", "run", "./services/main.py"]
+ENTRYPOINT ["fastapi", "run", "./core/main.py"]

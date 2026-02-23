@@ -19,5 +19,6 @@ services:
     build: .
     ports:
       - "80:8000"
-    volumes:
-      - ./storage:/app/storage/:rw
+
+    env_file:
+      - core/.env
