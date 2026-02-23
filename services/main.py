@@ -1,15 +1,15 @@
 import datetime
 import logging
-import jwt
-from uuid import UUID
 from datetime import datetime, timedelta, timezone
-from fastapi import Depends, FastAPI, HTTPException, status, Request, Response
+
+import jwt
+from fastapi import Depends, FastAPI, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from tortoise.contrib.fastapi import register_tortoise
 from pwdlib import PasswordHash
+from tortoise.contrib.fastapi import register_tortoise
 
 from services.models.tortoise_models import User
-from services.schemas.pydantic_models import UserResponse, UserCreate, UserBase
+from services.schemas.pydantic_models import UserResponse, UserCreate
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -51,7 +51,8 @@ async def authenticate_user(username, password) -> User:
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     user_obj = await authenticate_user(form_data.username, form_data.password)
 
-    token = jwt.encode({"sub": str(user_obj.user_id), "exp": datetime.now(timezone.utc) + timedelta(minutes=15)}, JWT_SECRET, "HS256")
+    token = jwt.encode({"sub": str(user_obj.user_id), "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
+                       JWT_SECRET, "HS256")
 
     return {"access_token": token, "token_type": "bearer"}
 
@@ -66,6 +67,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid creds"
         )
+    try:
+        assert payload.get("exp") > datetime.now(timezone.utc).timestamp()
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired"
+        )
     return user
 
 
@@ -79,9 +87,6 @@ async def delete_user(user: User = Depends(get_current_user)):
     user_id = user.user_id
     await User.get(user_id=user_id).delete()
     return {"user_id": user_id, "username": "username"}
-
-
-
 
 
 @app.get("/")
