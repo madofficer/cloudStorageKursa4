@@ -1,6 +1,0 @@
-__pycache__/
-**.pyc
-.idea/
-**.ruff_cache/
-**.mypy_cache/
-/core/.env
