@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class RequestUser(BaseModel):
+class UserCreateRequest(BaseModel):
     username: str
     password: str
 
@@ -13,7 +13,7 @@ class CreateUserDB(BaseModel):
     hashed_password: str
 
 
-class ResponseUser(BaseModel):
+class UserCreateResponse(BaseModel):
     id: UUID
     username: str
 
@@ -23,6 +23,6 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
-class ResponseTokens(BaseModel):
+class TokensCreateResponse(BaseModel):
     access_token: Token
     refresh_token: Token

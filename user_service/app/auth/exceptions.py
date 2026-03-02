@@ -1,27 +1,23 @@
-from typing import Dict, Any
+from http import HTTPStatus
 
-from fastapi import HTTPException, status
+from app.core import AppException
 
 
-class BaseAuthException(HTTPException):
+class BaseAuthException(AppException):
     status_code: int = None
     detail: str = None
-    headers: Dict[str, Any] = {"WWW-Authenticate": "Bearer"}
-
-    def __init__(self):
-        super().__init__(status_code=self.status_code, detail=self.detail, headers=self.headers)
 
 
 class UnauthorizedUserException(BaseAuthException):
-    status_code = status.HTTP_401_UNAUTHORIZED
+    status_code = HTTPStatus.UNAUTHORIZED
     detail = "Invalid credentials"
 
 
 class LoginUserException(BaseAuthException):
-    status_code = status.HTTP_400_BAD_REQUEST
+    status_code = HTTPStatus.BAD_REQUEST
     detail = "Exception occurred during user authentication"
 
 
 class TokenDecodeException(BaseAuthException):
-    status_code = status.HTTP_401_UNAUTHORIZED
+    status_code = HTTPStatus.UNAUTHORIZED
     detail = "Invalid Token"
