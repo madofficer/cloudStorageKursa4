@@ -1,7 +1,8 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 from app.auth.constants import ISS
 from app.auth.exceptions import UnauthorizedUserException
+from app.auth.schemas import Token
 from app.auth.security import PasswordHasher
 from app.auth.services.token import TokenService
 from app.core import redis
@@ -32,3 +33,16 @@ class AuthService:
         )
 
         return {"access_token": access_token, "refresh_token": refresh_token}
+
+    @staticmethod
+    async def refresh(self, refresh_token: str) -> dict[str, str,]:
+        payload = TokenService.decode(refresh_token)
+        if not (
+                (payload["typ"] == "refresh"
+                 and payload["iss"] == ISS
+                 and payload["jti"])
+                and int(payload["exp"]) > datetime.now(timezone.utc).timestamp()
+        ):
+            raise UnauthorizedUserException
+
+

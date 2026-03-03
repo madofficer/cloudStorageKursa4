@@ -12,7 +12,7 @@ from .settings import settings
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     async with RegisterTortoise(
             app,
-            db_url=settings.DATABASE_URL,
+            db_url=settings.psql_url,
             modules={"models": ["app.user.models"]},
             generate_schemas=True,
             add_exception_handlers=True,

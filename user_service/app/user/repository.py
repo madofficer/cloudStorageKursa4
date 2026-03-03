@@ -20,7 +20,7 @@ class UserRepository[CreateSchemaType]:
 
     @staticmethod
     async def get_by_uuid(uuid: str | UUID) -> User | None:
-        return await User.get_or_none(username=uuid)
+        return await User.get_or_none(id=uuid)
 
     @staticmethod
     async def update(uuid: UUID, data: dict):

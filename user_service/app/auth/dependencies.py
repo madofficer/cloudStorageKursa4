@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import jwt
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -7,9 +9,6 @@ from app.auth.exceptions import TokenDecodeException
 from app.auth.services import TokenService
 from app.user.exceptions import UserAlreadyExistsException
 from app.user.models import User
-
-from typing import Annotated
-
 from app.user.repository import UserRepository
 
 
