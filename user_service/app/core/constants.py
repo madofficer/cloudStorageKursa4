@@ -16,7 +16,7 @@ class PortConst:
 
 @dataclass
 class PsqlConst:
-    SCHEMA: str = "postgresql+asyncpg"
+    SCHEMA: str = "postgres"
     DEFAULT_PORT: int = 5432
 
 

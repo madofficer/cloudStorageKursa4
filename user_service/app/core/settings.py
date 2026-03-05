@@ -50,6 +50,6 @@ class Settings(PsqlSettings, RedisSettings, JWTSettings):
 
 
 try:
-    settings = Settings()
+    app_settings = Settings()
 except ValidationError as e:
     raise
