@@ -4,7 +4,6 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from .redis_config import redis
 from .settings import app_settings
 
 
@@ -18,5 +17,3 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             add_exception_handlers=True,
     ):
         yield
-
-    await redis.aclose()

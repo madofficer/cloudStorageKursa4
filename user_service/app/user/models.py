@@ -4,8 +4,8 @@ from tortoise.fields import TextField, UUIDField, CharField
 
 class User(Model):
     id = UUIDField(primary_key=True)
-    name = CharField(unique=True, max_length=128)
-    password = TextField()
+    username = CharField(unique=True, max_length=128)
+    hashed_password = TextField()
 
     class Meta:
         table = "users"

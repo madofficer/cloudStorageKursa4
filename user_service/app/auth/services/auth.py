@@ -1,48 +1,90 @@
+import logging
+from dataclasses import dataclass
 from datetime import timedelta, datetime, timezone
+from uuid import UUID
 
-from app.auth.constants import ISS
+from fastapi import Response
+
+from app.auth.constants import ISS, ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME, ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE, \
+    SERVICE_HEADER
 from app.auth.exceptions import UnauthorizedUserException
-from app.auth.schemas import Token
 from app.auth.security import PasswordHasher
-from app.auth.services.token import TokenService
-from app.core import redis
+from app.auth.services.token import TokenService, Token
 from app.user.repository import UserRepository
+
+
+@dataclass(frozen=True, slots=True)
+class LoginResult:
+    access: Token
+    refresh: Token
+    user_id: str
 
 
 class AuthService:
 
     @staticmethod
-    async def login_user(username: str, password: str) -> dict[str, str]:
-        user = await UserRepository.get_by_username(username=username)
-        if not PasswordHasher.verify(password, user.password):
-            raise UnauthorizedUserException
-
-        user_id = user.id
-        access_token = TokenService.encode(sub=user_id, iss=ISS, typ="access", ttl=timedelta(minutes=15))
-        rt_jti, refresh_token, rt_ttl = TokenService.create_refresh(
+    async def create_tokens(user_id: str):
+        access_token = TokenService.encode(sub=user_id, iss=ISS, typ=ACCESS_TOKEN_TYPE, ttl=timedelta(minutes=15))
+        refresh_token = TokenService.create_refresh(
             sub=user_id,
             iss=ISS,
-            typ="refresh",
+            typ=REFRESH_TOKEN_TYPE,
             ttl=timedelta(days=14),
         )
+        return access_token, refresh_token
 
-        await redis.set(
-            f"rt:{str(rt_jti)}",
-            str(user_id),
-            ex=int(rt_ttl.total_seconds()),
+    @classmethod
+    async def login_user(cls, username: str, password: str) -> LoginResult:
+        user = await UserRepository.get_by_username(username=username)
+        if not PasswordHasher.verify(password, user.hashed_password):
+            raise UnauthorizedUserException()
+
+        user_id = str(user.id)
+        access_token, refresh_token = await cls.create_tokens(user_id)
+
+        return LoginResult(
+            access=access_token,
+            refresh=refresh_token,
+            user_id=user_id
         )
 
-        return {"access_token": access_token, "refresh_token": refresh_token}
+    @classmethod
+    async def refresh(cls, response: Response, refresh_token: str | None) -> dict[str, str]:
+        if not refresh_token:
+            raise
 
-    @staticmethod
-    async def refresh(self, refresh_token: str) -> dict[str, str,]:
         payload = TokenService.decode(refresh_token)
         if not (
-                (payload["typ"] == "refresh"
+                (payload["typ"] == REFRESH_TOKEN_TYPE
                  and payload["iss"] == ISS
                  and payload["jti"])
                 and int(payload["exp"]) > datetime.now(timezone.utc).timestamp()
         ):
-            raise UnauthorizedUserException
+            raise UnauthorizedUserException()
 
+        user_id = payload["sub"]
+        access_token, refresh_token = await cls.create_tokens(user_id, response)
 
+        return {ACCESS_TOKEN_NAME: access_token, REFRESH_TOKEN_NAME: refresh_token}
+
+    @classmethod
+    async def verify_access(cls, authorization: str | None) -> Response:
+
+        if authorization is None:
+            raise UnauthorizedUserException()
+
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not token:
+            raise UnauthorizedUserException()
+
+        try:
+            payload = TokenService.decode(token)
+            user_id = payload["sub"]
+            if payload["typ"] != ACCESS_TOKEN_TYPE or not user_id:
+                raise
+        except:
+            raise UnauthorizedUserException()
+
+        response = Response()
+        response.headers[SERVICE_HEADER] = str(user_id)
+        return Response(headers=response.headers)

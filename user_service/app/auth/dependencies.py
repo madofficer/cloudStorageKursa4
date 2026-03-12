@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 import jwt
 from fastapi import Depends
@@ -15,7 +15,7 @@ from app.user.repository import UserRepository
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token/login")
 oauth2_scheme_dep = Annotated[str, Depends(oauth2_scheme)]
 
-form_data_dep = Annotated[OAuth2PasswordRequestForm, Depends()]
+PassReqDep: TypeAlias = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 
 async def get_current_user(token: oauth2_scheme_dep) -> User:

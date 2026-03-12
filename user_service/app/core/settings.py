@@ -23,27 +23,14 @@ class PsqlSettings(BaseSettings):
         ).unicode_string()
 
 
-class RedisSettings(BaseSettings):
-    redis_host: str = Field(..., min_length=HostConst.MIN_LENGTH, max_length=HostConst.MAX_LENGTH)
-    redis_port: int = Field(RedisConst.DEFAULT_PORT, gt=PortConst.MIN, lt=PortConst.MAX)
-
-    @property
-    def redis_url(self) -> str:
-        return RedisDsn.build(
-            scheme=RedisConst.SCHEMA,
-            host=self.redis_host,
-            port=self.redis_port,
-        ).unicode_string()
-
 
 class JWTSettings(BaseSettings):
     jwt_secret: str
     jwt_algorithm: JWTConst.AVAILABLE_ALGORITHMS = JWTConst.DEFAULT_ALGORITHM
 
 
-class Settings(PsqlSettings, RedisSettings, JWTSettings):
+class Settings(PsqlSettings, JWTSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )

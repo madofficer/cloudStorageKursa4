@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .models import User
+from ..auth.schemas import UserCreateResponse
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
