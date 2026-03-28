@@ -1,0 +1,10 @@
+from fastapi import FastAPI
+
+from app.auth.api import auth_router
+from app.core import lifespan
+from app.user.api import user_router
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(auth_router)
+app.include_router(user_router)

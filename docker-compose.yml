@@ -1,27 +1,42 @@
-version: '3.5'
 services:
-  # filestorage:
-  #   build: ./filestorage
-  #   ports:
-  #     - 8000:8000
-
-  db:
+  postgres:
     image: postgres:17-alpine
-    ports:
-      - 5432:5432
-    restart: always
+    container_name: app-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: afonya
-      POSTGRES_DB: user_db
+      POSTGRES_DB: ${DATABASE_DB}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
-  backend_auth:
-    build: ./user
-    ports:
-      - "80:8000"
-    restart: always
-    env_file: ./user/.env
+  app:
+    build:
+      context: src
+      dockerfile: user_service/Dockerfile
+    container_name: app-auth
+    env_file:
+      - src/.env
     environment:
-      - PG_DSN=postgres://postgres:afonya@db:5432/user_db
+
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+
+    ports:
+      - "8000:8000"
     depends_on:
-      - db
+      postgres:
+        condition: service_healthy
+
+
+    command: [ "uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000" ]
+
+
+volumes:
+  pgdata:
