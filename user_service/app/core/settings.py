@@ -1,7 +1,7 @@
-from pydantic import Field, ValidationError, PostgresDsn, RedisDsn
+from pydantic import Field, ValidationError, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.core.constants import HostConst, PortConst, PsqlConst, RedisConst, JWTConst
+from app.core.constants import HostConst, PortConst, PsqlConst, JWTConst
 
 
 class PsqlSettings(BaseSettings):
