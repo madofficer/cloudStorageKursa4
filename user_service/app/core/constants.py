@@ -21,12 +21,6 @@ class PsqlConst:
 
 
 @dataclass
-class RedisConst:
-    SCHEMA: str = "redis"
-    DEFAULT_PORT: int = 6379
-
-
-@dataclass
 class JWTConst:
     DEFAULT_ALGORITHM: str = "HS256"
     AVAILABLE_ALGORITHMS = Literal["HS256"]

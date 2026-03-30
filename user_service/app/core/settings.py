@@ -1,12 +1,16 @@
-from pydantic import Field, ValidationError, PostgresDsn, RedisDsn
+from pydantic import Field, ValidationError, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.core.constants import HostConst, PortConst, PsqlConst, RedisConst, JWTConst
+from app.core.constants import HostConst, PortConst, PsqlConst, JWTConst
 
 
 class PsqlSettings(BaseSettings):
-    database_host: str = Field(..., min_length=HostConst.MIN_LENGTH, max_length=HostConst.MAX_LENGTH)
-    database_port: int = Field(PsqlConst.DEFAULT_PORT, gt=PortConst.MIN, lt=PortConst.MAX)
+    database_host: str = Field(
+        ..., min_length=HostConst.MIN_LENGTH, max_length=HostConst.MAX_LENGTH
+    )
+    database_port: int = Field(
+        PsqlConst.DEFAULT_PORT, gt=PortConst.MIN, lt=PortConst.MAX
+    )
     database_user: str
     database_db: str
     database_password: str
@@ -21,7 +25,6 @@ class PsqlSettings(BaseSettings):
             password=self.database_password,
             path=self.database_db,
         ).unicode_string()
-
 
 
 class JWTSettings(BaseSettings):
