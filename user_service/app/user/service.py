@@ -8,7 +8,6 @@ class UserService:
     @staticmethod
     async def create_user(username: str, password: str) -> dict[str, UUID | str]:
         hashed_password = PasswordHasher.hash(password)
-        print(password, hashed_password)
         new_user = await UserRepository.create(
             username=username, hashed_password=hashed_password
         )

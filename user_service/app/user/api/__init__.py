@@ -8,4 +8,4 @@ user_router = APIRouter(prefix="/api")
 user_router.include_router(v1_router)
 
 
-__all__ = "user_router"
+__all__ = ("user_router",)
