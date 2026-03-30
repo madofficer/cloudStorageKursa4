@@ -10,7 +10,6 @@ CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
 
 class UserRepository[CreateSchemaType]:
-
     @staticmethod
     async def create(username: str, hashed_password: str) -> User:
         return await User.create(username=username, hashed_password=hashed_password)

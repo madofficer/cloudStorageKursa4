@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.exceptions import S3SettingsException
+
 
 class S3Settings(BaseSettings):
     service_name: str = "s3"
@@ -18,5 +20,5 @@ class S3Settings(BaseSettings):
 try:
     s3_settings = S3Settings()
 
-except Exception as exc: # TODO: custom validation exception
-    raise
+except Exception as exc:
+    raise S3SettingsException() from exc

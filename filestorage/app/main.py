@@ -7,7 +7,7 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url="/docs",
     openapi_url="/openapi.json",
-    root_path="/v1/api/files"
+    root_path="/v1/api/files",
 )
 
 app.include_router(router=router)

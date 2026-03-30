@@ -8,4 +8,4 @@ auth_router = APIRouter(prefix="/api")
 auth_router.include_router(v1_router)
 
 
-__all__ = ("auth_router")
+__all__ = "auth_router"
