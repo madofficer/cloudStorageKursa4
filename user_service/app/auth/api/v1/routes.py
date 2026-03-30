@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from fastapi import APIRouter, status, Response, Header, Cookie
 
 from app.auth.constants import REFRESH_TOKEN_NAME, SERVICE_HEADER
@@ -5,16 +7,20 @@ from app.auth.dependencies import PassReqDep
 from app.auth.schemas import TokensCreateResponse
 from app.auth.services import AuthService
 
-
 router = APIRouter()
 
+@dataclass(frozen=True, slots=True)
+class LoginResponse:
+    access_token: str
+    token_type: str = "bearer"
 
-@router.post("/login", response_model=TokensCreateResponse, status_code=status.HTTP_200_OK)
-async def login_user(form_data: PassReqDep) -> Response:
+
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+async def login_user(form_data: PassReqDep):
     login = await AuthService.login_user(form_data.username, form_data.password)
     response = Response(
         status_code=status.HTTP_200_OK,
-        headers={SERVICE_HEADER: login.user_id},
+        headers={SERVICE_HEADER: login.user_id}
     )
     response.set_cookie(
         key=REFRESH_TOKEN_NAME,
@@ -25,7 +31,10 @@ async def login_user(form_data: PassReqDep) -> Response:
         path="/v1/api/auth"
     )
 
-    return response
+    return {
+        "access_token": login.access.token,
+        "token_type": "bearer",
+    }
 
 
 @router.post("/refresh", response_model=TokensCreateResponse, status_code=status.HTTP_201_CREATED)

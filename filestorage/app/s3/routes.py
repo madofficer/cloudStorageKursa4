@@ -3,15 +3,18 @@ from uuid import UUID
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from filestorage.app.core.dependencies import S3ClientDep
+from app.core.dependencies import S3ClientDep, CurrentUserIdDep, SecurityDep
 
 router = APIRouter()
 
 
 @router.get("/healthcheck")
-async def healthcheck(s3_client: S3ClientDep) -> JSONResponse:
+async def healthcheck(s3_client: S3ClientDep, current_user: CurrentUserIdDep, _: SecurityDep) -> JSONResponse:
     buckets = await s3_client.list_buckets()
-    return JSONResponse({"status": "ok", "buckets": buckets.get("Buckets", [])})
+    return JSONResponse({"status": "ok",
+                         "user_id": str(current_user),
+                         "buckets": str(buckets.get("Buckets", [])),
+                         })
 
 
 @router.get("/file/{file_id}")
